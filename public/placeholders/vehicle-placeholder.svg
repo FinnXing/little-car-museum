@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 450" role="img" aria-labelledby="title description">
+  <title id="title">开发占位汽车轮廓</title>
+  <desc id="description">仅用于开发的通用汽车轮廓，不代表任何真实品牌或车型。</desc>
+  <rect width="800" height="450" rx="32" fill="#e5f2ef"/>
+  <path d="M180 285h440l-34-92c-8-22-29-37-53-37H317c-24 0-46 13-57 35l-45 94Z" fill="#69a9a1"/>
+  <path d="M279 207c8-15 23-24 40-24h211c13 0 25 8 30 20l17 47H256l23-43Z" fill="#f5f8f6"/>
+  <rect x="150" y="250" width="500" height="100" rx="38" fill="#2f7771"/>
+  <circle cx="250" cy="350" r="55" fill="#173b38"/>
+  <circle cx="250" cy="350" r="24" fill="#b8d8d3"/>
+  <circle cx="550" cy="350" r="55" fill="#173b38"/>
+  <circle cx="550" cy="350" r="24" fill="#b8d8d3"/>
+  <text x="400" y="85" fill="#245e59" font-family="Arial, sans-serif" font-size="28" text-anchor="middle">DEVELOPMENT PLACEHOLDER</text>
+</svg>

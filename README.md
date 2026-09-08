@@ -2,7 +2,7 @@
 
 面向 3～8 岁儿童及家长的响应式汽车认知网站，让孩子通过旋转、缩放和切换视角观察汽车，认识汽车类型、颜色与外观部件。
 
-> 当前阶段：TASK-001 工程初始化。已配置 Next.js、TypeScript、Tailwind CSS、ESLint、Prettier、Vitest 和 Playwright；首页仅为准备中页面，尚未开发车辆、3D、数据库或后台业务。
+> 当前阶段：TASK-002 核心类型与开发占位数据。首页仍为准备中页面，尚未开发车辆列表、3D、数据库或后台业务。
 
 ## 项目文档
 
@@ -69,8 +69,10 @@ src/
   components/
     car/ brand/ layout/ three/ ui/
   lib/
+    data/               # 明确标记的开发占位数据
     db/ storage/ validation/ three/ licenses/
-  hooks/ stores/ types/
+  hooks/ stores/
+  types/                # 内容、查看器、本地存储、统计和 API 契约
   styles/              # Tailwind 入口与全局基础样式
   tests/
     unit/              # Vitest 单元/组件测试
@@ -97,7 +99,9 @@ assets-license/        # 许可证与来源证据
 
 ## 开发计划与产品边界
 
-下一步为 TASK-002：核心类型与明确标注的占位数据。完整顺序和任务范围见需求文档第 35 章，不自动扩展到后续任务。
+TASK-002 已建立内容、查看器、本地存储、统计和 API 的类型契约，并提供 5 辆通用汽车开发数据。数据常量使用 `DEVELOPMENT_PLACEHOLDER_ONLY` 标识，所有车辆均为 `DRAFT`，不关联品牌或许可证，不计入 MVP 内容数量。
+
+下一步为 TASK-003：汽车列表、分类筛选及页面状态。完整顺序和任务范围见需求文档第 35 章，不自动扩展到后续任务。
 
 计划实现分类浏览、3D 观察及图片降级、本地收藏/最近浏览、名称语音和内容管理后台。MVP 上线至少需要 12 辆可展示汽车、6 个有已发布内容的分类，其中至少 8 辆支持 3D；完整上线条件以第 41 章为准，工程初始化不代表 MVP 完成。
 
