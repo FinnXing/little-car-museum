@@ -1,0 +1,52 @@
+# Dependencies
+node_modules/
+
+# Next.js and build output
+.next/
+out/
+dist/
+build/
+*.tsbuildinfo
+next-env.d.ts
+
+# Test output and local browser authentication
+coverage/
+.nyc_output/
+playwright-report/
+test-results/
+playwright/.cache/
+playwright/.auth/
+
+# Local environment and secrets; keep the documented template
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+
+# Logs and caches
+*.log
+.eslintcache
+.cache/
+.turbo/
+.vercel/
+
+# Local database/storage volumes and backups
+/.local/
+/backups/
+*.db
+*.db-journal
+*.sqlite
+*.sqlite3
+
+# OS and editor temporary files
+.DS_Store
+Thumbs.db
+Desktop.ini
+.idea/
+*.swp
+*.swo
+*~
+
+# Keep lockfiles, Prisma migrations, licensed assets and license records tracked.
+# Large source assets should use a deliberate storage/LFS policy, not blanket ignores.
