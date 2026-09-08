@@ -1,3 +1,5 @@
+import Link from "next/link";
+
 export default function HomePage() {
   return (
     <main className="mx-auto flex min-h-dvh max-w-3xl flex-col justify-center gap-5 px-6 py-16 sm:px-10">
@@ -11,6 +13,12 @@ export default function HomePage() {
       <p className="text-base leading-relaxed text-slate-600">
         汽车馆正在准备中，期待与你一起探索。
       </p>
+      <Link
+        href="/cars"
+        className="mt-3 grid min-h-12 w-fit place-items-center rounded-full border-2 border-ink bg-sun px-6 font-bold text-ink transition-transform active:translate-y-0.5"
+      >
+        进入汽车展厅
+      </Link>
     </main>
   );
 }

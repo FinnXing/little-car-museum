@@ -24,3 +24,24 @@ test("serves the preparation page without runtime errors or horizontal overflow"
   ).toBe(true);
   expect(errors).toEqual([]);
 });
+
+test("keeps draft fixture vehicles out of the production car list", async ({
+  page,
+}) => {
+  const response = await page.goto("/cars");
+
+  expect(response?.status()).toBe(200);
+  await expect(page).toHaveTitle("汽车展厅 | 小小汽车馆");
+  await expect(
+    page.getByRole("heading", { name: "今天想认识 哪辆汽车？" }),
+  ).toBeVisible();
+  await expect(
+    page.getByRole("heading", { name: "这里还没有汽车" }),
+  ).toBeVisible();
+  await expect(page.getByRole("article")).toHaveCount(0);
+  expect(
+    await page.evaluate(
+      () => document.documentElement.scrollWidth <= window.innerWidth,
+    ),
+  ).toBe(true);
+});
