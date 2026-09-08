@@ -1,0 +1,13 @@
+@import "tailwindcss";
+
+body {
+  margin: 0;
+  background: #f5f8f6;
+  color: #162c2b;
+  font-family: Arial, "PingFang SC", "Microsoft YaHei", sans-serif;
+}
+
+:focus-visible {
+  outline: 3px solid #0f766e;
+  outline-offset: 4px;
+}
