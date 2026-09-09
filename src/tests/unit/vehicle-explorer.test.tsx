@@ -17,6 +17,9 @@ describe("VehicleExplorer", () => {
 
     expect(screen.getAllByRole("article")).toHaveLength(5);
     expect(screen.getByRole("heading", { name: "红色闪电跑车" })).toBeVisible();
+    expect(
+      screen.getByRole("link", { name: "查看红色闪电跑车详情" }),
+    ).toHaveAttribute("href", "/cars/placeholder-red-lightning-sports-car");
     expect(screen.getAllByText("通用 3D")).toHaveLength(5);
     expect(screen.getAllByText("未收藏")).toHaveLength(5);
     expect(screen.getByText(/不计入正式上线车辆/)).toBeVisible();

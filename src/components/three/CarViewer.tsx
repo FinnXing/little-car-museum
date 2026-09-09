@@ -1,7 +1,7 @@
 "use client";
 
 import { Canvas, useFrame, useThree } from "@react-three/fiber";
-import { OrbitControls, useGLTF, useProgress } from "@react-three/drei";
+import { Html, OrbitControls, useGLTF, useProgress } from "@react-three/drei";
 import type { OrbitControls as OrbitControlsImpl } from "three-stdlib";
 import {
   Component,
@@ -17,6 +17,7 @@ import {
 } from "react";
 import { Box3, Color, Mesh, Object3D, Vector3 } from "three";
 import type { CameraConfig, VehicleColor } from "@/types";
+import type { Hotspot } from "@/types";
 import type {
   CarViewerProps,
   ModelQuality,
@@ -251,6 +252,41 @@ function ProgressReporter({
   return null;
 }
 
+function HotspotMarkers({
+  hotspots,
+  onSelect,
+}: {
+  hotspots: Hotspot[];
+  onSelect: (hotspot: Hotspot) => void;
+}) {
+  return (
+    <>
+      {hotspots
+        .filter((hotspot) => hotspot.enabled)
+        .map((hotspot) => (
+          <Html
+            key={hotspot.id}
+            position={[hotspot.position.x, hotspot.position.y, hotspot.position.z]}
+            center
+            distanceFactor={5}
+          >
+            <button
+              type="button"
+              className="grid size-10 place-items-center rounded-full border-2 border-ink bg-sun text-lg font-black shadow-[3px_3px_0_var(--color-ink)]"
+              aria-label={`查看${hotspot.partName}说明`}
+              onClick={(event) => {
+                event.stopPropagation();
+                onSelect(hotspot);
+              }}
+            >
+              <span aria-hidden="true">+</span>
+            </button>
+          </Html>
+        ))}
+    </>
+  );
+}
+
 function FallbackGallery({
   imageUrls,
   onRetry,
@@ -339,7 +375,7 @@ export function CarViewer({
   coverImageUrl,
   defaultCamera,
   colors,
-  hotspots: _hotspots,
+  hotspots,
   autoRotate: initialAutoRotate = false,
   preferredQuality = "AUTO",
   onLoadStart,
@@ -399,6 +435,7 @@ export function CarViewer({
   const [cancelSignal, setCancelSignal] = useState(0);
   const [retryKey, setRetryKey] = useState(0);
   const [isInteracting, setIsInteracting] = useState(false);
+  const [selectedHotspotId, setSelectedHotspotId] = useState<string | null>(null);
   const controlsRef = useRef<OrbitControlsImpl | null>(null);
   const loadSuccessSent = useRef(false);
   const modelErrorCount = useRef(0);
@@ -407,6 +444,7 @@ export function CarViewer({
 
   const modelUrl = resolveModelUrl({ quality, highModelUrl, lowModelUrl });
   const selectedColor = colors.find((color) => color.id === selectedColorId);
+  const selectedHotspot = hotspots.find((hotspot) => hotspot.id === selectedHotspotId);
   const imageUrls = useMemo(
     () =>
       Array.from(
@@ -478,7 +516,10 @@ export function CarViewer({
     status === "ERROR" ||
     status === "FALLBACK_IMAGE";
   const controlsDisabled = showFallback || status !== "READY";
-  void _hotspots;
+  const handleHotspotSelect = (hotspot: Hotspot) => {
+    setSelectedHotspotId(hotspot.id);
+    emitInteraction("HOTSPOT_CLICK");
+  };
 
   return (
     <section
@@ -567,6 +608,7 @@ export function CarViewer({
                       onReady={handleSceneReady}
                     />
                   ) : null}
+                  <HotspotMarkers hotspots={hotspots} onSelect={handleHotspotSelect} />
                 </Suspense>
                 <OrbitControls
                   ref={controlsRef}
@@ -619,6 +661,23 @@ export function CarViewer({
           </div>
         )}
       </div>
+
+      {selectedHotspot ? (
+        <aside
+          aria-live="polite"
+          className="rounded-[1.25rem] border-2 border-ink bg-sun p-4"
+        >
+          <p className="text-sm font-black tracking-wide text-orange-ink uppercase">
+            部件小知识
+          </p>
+          <h3 className="mt-1 font-display text-xl font-black text-ink">
+            {selectedHotspot.partName}
+          </h3>
+          <p className="mt-1 leading-7 text-ink">
+            {selectedHotspot.descriptionChild ?? "这是汽车上的一个重要部件。"}
+          </p>
+        </aside>
+      ) : null}
 
       <div className="grid gap-3 rounded-[1.5rem] border-2 border-ink bg-card p-4">
         <div

@@ -67,13 +67,23 @@ test("opens the independent 3D viewer prototype with accessible controls", async
   await expect(
     page.getByRole("button", { name: "开启自动旋转" }),
   ).toBeVisible();
-  await expect(
-    page.getByRole("button", { name: "选择展示红" }),
-  ).toBeVisible();
+  await expect(page.getByRole("button", { name: "选择展示红" })).toBeVisible();
   expect(
     await page.evaluate(
       () => document.documentElement.scrollWidth <= window.innerWidth,
     ),
   ).toBe(true);
   expect(errors).toEqual([]);
+});
+
+test("does not expose draft vehicle details in production", async ({
+  page,
+}) => {
+  await page.goto("/cars/placeholder-red-lightning-sports-car");
+  await expect(
+    page.getByRole("heading", { name: "汽车暂时没有开过来" }),
+  ).toBeVisible();
+  await expect(page.getByRole("heading", { name: "红色闪电跑车" })).toHaveCount(
+    0,
+  );
 });
