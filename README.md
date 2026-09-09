@@ -2,7 +2,7 @@
 
 面向 3～8 岁儿童及家长的响应式汽车认知网站，让孩子通过旋转、缩放和切换视角观察汽车，认识汽车类型、颜色与外观部件。
 
-> 当前阶段：TASK-008 公共 API。已接入 `/api/v1` 分类、品牌、汽车、随机汽车、搜索和公开许可证接口；接口只返回已发布内容。
+> 当前阶段：TASK-009 管理员认证。已接入管理员登录、签名 Session Cookie、后台路由保护、失败限流和退出登录；不提供公众注册。
 
 ## 项目文档
 
@@ -32,6 +32,8 @@ TASK-006 页面为 `/favorites` 和 `/history`。记录只保存在当前浏览�
 
 TASK-007 已建立 PostgreSQL + Prisma 数据模型、首个迁移和幂等开发 Seed。TASK-008 的公共接口位于 `/api/v1`，数据库未配置时前台占位页面仍可独立运行。
 
+TASK-009 管理员入口为 `/admin/login`；登录接口为 `POST /api/v1/admin/login`，退出接口为 `POST /api/v1/admin/logout`，当前 Session 可通过 `GET /api/v1/admin/session` 检查。管理员账号使用 `npm run admin:create` 创建或重置，密码只保存为 scrypt 哈希。
+
 前台占位页面无需数据库即可运行；执行 Prisma 校验、生成、迁移或 Seed 前，需要在 Prisma CLI 使用的 `.env` 中配置真实的 `DATABASE_URL`（Next.js 页面仍可使用 `.env.local`）。`.env.example` 只提供占位连接串，不包含真实凭据。
 
 ## 开发与验证命令
@@ -53,6 +55,7 @@ TASK-007 已建立 PostgreSQL + Prisma 数据模型、首个迁移和幂等开�
 | `npm run db:migrate`   | 创建并应用本地开发迁移                  |
 | `npm run db:deploy`    | 应用已有生产迁移                        |
 | `npm run db:seed`      | 写入开发环境占位 Seed                   |
+| `npm run admin:create` | 使用环境变量创建或重置管理员            |
 
 首次运行 E2E 需要安装 Chromium，并先生成生产构建：
 
@@ -95,12 +98,12 @@ API 统一使用 `/api/v1` 前缀，成功响应为 `{ "success": true, "data": 
 
 ```text
 src/
-  app/                 # 根布局与准备中页面；后续页面和 api/v1 按任务添加
+  app/                 # 页面与 api/v1 Route Handlers
   components/
     car/ brand/ layout/ three/ ui/
   lib/
     data/               # 明确标记的开发占位数据
-    db/ storage/ validation/ three/ licenses/
+    api/ auth/ db/ storage/ validation/ three/ licenses/
   hooks/ stores/
   types/                # 内容、查看器、本地存储、统计和 API 契约
   styles/              # Tailwind 入口与全局基础样式
@@ -121,7 +124,7 @@ assets-license/        # 许可证与来源证据
 
 - `NEXT_PUBLIC_SITE_URL`：站点地址。
 - `DATABASE_URL`：PostgreSQL 连接串，仅服务端使用；请替换 `.env.example` 中的 `USER` 与 `PASSWORD` 占位符。
-- `AUTH_SECRET`：后续管理员会话密钥，仅服务端使用。
+- `AUTH_SECRET`：管理员签名 Session 密钥，仅服务端使用；生产环境至少 32 个字符。
 - `STORAGE_*`：后续对象存储配置，密钥不暴露到客户端。
 - `MAX_*_SIZE_MB`：后续上传限制，低清/高清 GLB 为 20/50MB，图片 5MB，音频与许可证附件 10MB。
 - `NEXT_PUBLIC_ANALYTICS_ENABLED=false`、`ERROR_MONITORING_DSN`：预留统计/错误监控设置；当前没有接入监控服务，儿童区域默认关闭上报。
@@ -132,7 +135,7 @@ assets-license/        # 许可证与来源证据
 
 TASK-003 已提供 `/cars` 汽车展厅、分类筛选、响应式汽车卡片和完整页面状态。TASK-004 新增 `/prototype/viewer` 独立观察台，支持模型加载与图片降级。TASK-005 新增 `/cars/[slug]` 详情页，包含查看器、收藏、热点和素材信息。TASK-006 新增 `/favorites` 与 `/history` 本地记录页。由于占位车辆均为草稿，它们只会在 `next dev` 中显示；生产构建默认进入空状态，避免公开未发布内容。
 
-下一步为 TASK-009：开发管理员认证。完整顺序和任务范围见需求文档第 35 章。
+下一步为 TASK-010：开发后台管理。完整顺序和任务范围见需求文档第 35 章。
 
 计划实现分类浏览、3D 观察及图片降级、本地收藏/最近浏览、名称语音和内容管理后台。MVP 上线至少需要 12 辆可展示汽车、6 个有已发布内容的分类，其中至少 8 辆支持 3D；完整上线条件以第 41 章为准，工程初始化不代表 MVP 完成。
 
