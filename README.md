@@ -2,7 +2,7 @@
 
 面向 3～8 岁儿童及家长的响应式汽车认知网站，让孩子通过旋转、缩放和切换视角观察汽车，认识汽车类型、颜色与外观部件。
 
-> 当前阶段：TASK-006 本地收藏和最近浏览。已实现版本化 LocalStorage、异常恢复、收藏上限、历史去重、失效记录清洗及对应页面；模型仍为馆内自制通用占位内容。
+> 当前阶段：TASK-007 数据库基础设施。已建立 PostgreSQL + Prisma 数据模型、首个迁移和幂等开发 Seed；前台仍使用馆内自制通用占位内容。
 
 ## 项目文档
 
@@ -26,11 +26,11 @@ npm run dev
 
 TASK-004 原型页位于 [/prototype/viewer](http://localhost:3000/prototype/viewer)，使用 `public/models/placeholder-car.glb`。GLB 由 `scripts/generate-placeholder-glb.mjs` 生成，后续可替换为已审核的模型文件。
 
-TASK-005 详情页路由为 `/cars/[slug]`。开发环境可打开 `/cars/placeholder-red-lightning-sports-car` 预览占位数据；生产构建会隐藏草稿车辆，等待后续数据库与发布流程接入。
+TASK-005 详情页路由为 `/cars/[slug]`。开发环境可打开 `/cars/placeholder-red-lightning-sports-car` 预览占位数据；生产构建会隐藏草稿车辆。
 
 TASK-006 页面为 `/favorites` 和 `/history`。记录只保存在当前浏览器，不收集儿童身份信息；内容列表以当前可访问车辆为准清洗失效记录。
 
-当前页面无需数据库、对象存储或密钥即可运行；`.env.local` 的服务端配置保留空值即可。后续 TASK-007/009/011 接入数据库、认证和上传时再配置对应变量，不要填写虚构凭据。
+前台占位页面无需数据库即可运行；执行 Prisma 校验、生成、迁移或 Seed 前，需要在 Prisma CLI 使用的 `.env` 中配置真实的 `DATABASE_URL`（Next.js 页面仍可使用 `.env.local`）。`.env.example` 只提供占位连接串，不包含真实凭据。
 
 ## 开发与验证命令
 
@@ -46,6 +46,11 @@ TASK-006 页面为 `/favorites` 和 `/history`。记录只保存在当前浏览�
 | `npm run build`        | 生成生产构建                            |
 | `npm run start`        | 启动已构建的生产服务                    |
 | `npm run test:e2e`     | 运行 Playwright 浏览器测试              |
+| `npm run db:validate`  | 校验 Prisma schema（不连接数据库）      |
+| `npm run db:generate`  | 生成 Prisma Client                      |
+| `npm run db:migrate`   | 创建并应用本地开发迁移                  |
+| `npm run db:deploy`    | 应用已有生产迁移                        |
+| `npm run db:seed`      | 写入开发环境占位 Seed                   |
 
 首次运行 E2E 需要安装 Chromium，并先生成生产构建：
 
@@ -83,31 +88,32 @@ src/
   tests/
     unit/              # Vitest 单元/组件测试
     e2e/               # Playwright 浏览器测试
-prisma/                # 后续 TASK-007 建立 schema、迁移和 seed
+prisma/                # PostgreSQL schema、迁移和开发 Seed
 public/
   images/ audio/ placeholders/
 assets-license/        # 许可证与来源证据
 ```
 
-预留目录通过 `.gitkeep` 纳入 Git，实际实现时按需替换；不提前添加业务路由、空组件或数据库模型。TASK-004 已接入 Three.js、React Three Fiber 和 drei；Prisma 与存储依赖随对应任务接入。
+预留目录通过 `.gitkeep` 纳入 Git，实际实现时按需替换；不提前添加无关业务路由或空组件。TASK-004 已接入 Three.js、React Three Fiber 和 drei；TASK-007 已接入 Prisma，数据库访问入口位于 `src/lib/db/prisma.ts`。
 
 ## 环境变量
 
 `.env.example` 提供变量名和非敏感默认值，真实环境文件由 `.gitignore` 排除：
 
 - `NEXT_PUBLIC_SITE_URL`：站点地址。
-- `DATABASE_URL`、`AUTH_SECRET`：后续数据库连接与会话密钥，仅服务端使用。
+- `DATABASE_URL`：PostgreSQL 连接串，仅服务端使用；请替换 `.env.example` 中的 `USER` 与 `PASSWORD` 占位符。
+- `AUTH_SECRET`：后续管理员会话密钥，仅服务端使用。
 - `STORAGE_*`：后续对象存储配置，密钥不暴露到客户端。
 - `MAX_*_SIZE_MB`：后续上传限制，低清/高清 GLB 为 20/50MB，图片 5MB，音频与许可证附件 10MB。
 - `NEXT_PUBLIC_ANALYTICS_ENABLED=false`、`ERROR_MONITORING_DSN`：预留统计/错误监控设置；当前没有接入监控服务，儿童区域默认关闭上报。
 
-本阶段未进行数据库迁移，也没有要求配置真实凭据。
+迁移文件已提交到 `prisma/migrations`，但仓库不包含真实数据库凭据或数据库备份。
 
 ## 开发计划与产品边界
 
 TASK-003 已提供 `/cars` 汽车展厅、分类筛选、响应式汽车卡片和完整页面状态。TASK-004 新增 `/prototype/viewer` 独立观察台，支持模型加载与图片降级。TASK-005 新增 `/cars/[slug]` 详情页，包含查看器、收藏、热点和素材信息。TASK-006 新增 `/favorites` 与 `/history` 本地记录页。由于占位车辆均为草稿，它们只会在 `next dev` 中显示；生产构建默认进入空状态，避免公开未发布内容。
 
-下一步为 TASK-007：建立数据库。完整顺序和任务范围见需求文档第 35 章，不自动扩展到后续任务。
+下一步为 TASK-008：开发公共 API。完整顺序和任务范围见需求文档第 35 章。
 
 计划实现分类浏览、3D 观察及图片降级、本地收藏/最近浏览、名称语音和内容管理后台。MVP 上线至少需要 12 辆可展示汽车、6 个有已发布内容的分类，其中至少 8 辆支持 3D；完整上线条件以第 41 章为准，工程初始化不代表 MVP 完成。
 
