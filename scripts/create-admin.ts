@@ -1,5 +1,8 @@
+import nextEnv from "@next/env";
 import { PrismaClient } from "@prisma/client";
 import { hashPassword } from "../src/lib/auth/password.ts";
+
+nextEnv.loadEnvConfig(process.cwd());
 
 const email = process.env.ADMIN_EMAIL?.trim().toLowerCase();
 const password = process.env.ADMIN_PASSWORD;
