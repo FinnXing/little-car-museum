@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { Prisma } from "@prisma/client";
 import type { ApiErrorCode, ApiResponse } from "@/types";
 
 export class ApiRequestError extends Error {
@@ -47,6 +48,28 @@ export async function withApiErrors<T>(handler: () => Promise<T>) {
   } catch (error) {
     if (error instanceof ApiRequestError) {
       return apiError(error.code, error.message, error.status, requestId);
+    }
+
+    if (error instanceof Prisma.PrismaClientKnownRequestError) {
+      if (error.code === "P2002") {
+        return apiError(
+          "SLUG_CONFLICT",
+          "slug 或其他唯一字段已经存在。",
+          409,
+          requestId,
+        );
+      }
+      if (error.code === "P2003") {
+        return apiError(
+          "VALIDATION_ERROR",
+          "请求关联的数据不存在或仍被其他内容使用。",
+          409,
+          requestId,
+        );
+      }
+      if (error.code === "P2025") {
+        return apiError("NOT_FOUND", "请求的内容不存在。", 404, requestId);
+      }
     }
 
     console.error(`[api:${requestId}]`, error);
