@@ -28,6 +28,11 @@ const resources = [
     title: "许可证管理",
     description: "记录素材来源、许可证和公开展示审核状态。",
   },
+  {
+    href: "/admin/assets",
+    title: "素材上传",
+    description: "上传图片、GLB 和音频，查看校验结果与文件摘要。",
+  },
 ] as const;
 
 export default function AdminPage() {

@@ -214,4 +214,25 @@ model Admin {
   lastLoginAt  DateTime?
   createdAt    DateTime  @default(now())
   updatedAt    DateTime  @updatedAt
+
+  uploadedAssets AssetObject[]
+}
+
+model AssetObject {
+  id             String    @id @default(cuid())
+  storageKey     String    @unique
+  originalName   String
+  safeName       String
+  assetType      AssetType
+  quality        String?
+  mimeType       String
+  sizeBytes      Int
+  checksumSha256 String
+  uploadedById   String
+  createdAt      DateTime  @default(now())
+
+  uploadedBy Admin @relation(fields: [uploadedById], references: [id], onDelete: Restrict, onUpdate: Cascade)
+
+  @@index([assetType, createdAt])
+  @@index([uploadedById, createdAt])
 }

@@ -9,6 +9,7 @@ const links = [
   ["/admin/categories", "分类"],
   ["/admin/brands", "品牌"],
   ["/admin/vehicles", "汽车"],
+  ["/admin/assets", "上传素材"],
   ["/admin/licenses", "许可证"],
 ] as const;
 
