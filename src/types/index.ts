@@ -1,5 +1,12 @@
 export type { AnalyticsEvent } from "./analytics";
-export type { ApiError, ApiErrorCode, ApiResponse } from "./api";
+export type {
+  ApiError,
+  ApiErrorCode,
+  ApiResponse,
+  PaginatedData,
+  VehicleDetail,
+  VehicleSummary,
+} from "./api";
 export type {
   AssetLicense,
   AssetReviewStatus,
