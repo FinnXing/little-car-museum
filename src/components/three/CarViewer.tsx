@@ -266,7 +266,11 @@ function HotspotMarkers({
         .map((hotspot) => (
           <Html
             key={hotspot.id}
-            position={[hotspot.position.x, hotspot.position.y, hotspot.position.z]}
+            position={[
+              hotspot.position.x,
+              hotspot.position.y,
+              hotspot.position.z,
+            ]}
             center
             distanceFactor={5}
           >
@@ -435,7 +439,9 @@ export function CarViewer({
   const [cancelSignal, setCancelSignal] = useState(0);
   const [retryKey, setRetryKey] = useState(0);
   const [isInteracting, setIsInteracting] = useState(false);
-  const [selectedHotspotId, setSelectedHotspotId] = useState<string | null>(null);
+  const [selectedHotspotId, setSelectedHotspotId] = useState<string | null>(
+    null,
+  );
   const controlsRef = useRef<OrbitControlsImpl | null>(null);
   const loadSuccessSent = useRef(false);
   const modelErrorCount = useRef(0);
@@ -444,7 +450,9 @@ export function CarViewer({
 
   const modelUrl = resolveModelUrl({ quality, highModelUrl, lowModelUrl });
   const selectedColor = colors.find((color) => color.id === selectedColorId);
-  const selectedHotspot = hotspots.find((hotspot) => hotspot.id === selectedHotspotId);
+  const selectedHotspot = hotspots.find(
+    (hotspot) => hotspot.id === selectedHotspotId,
+  );
   const imageUrls = useMemo(
     () =>
       Array.from(
@@ -608,7 +616,10 @@ export function CarViewer({
                       onReady={handleSceneReady}
                     />
                   ) : null}
-                  <HotspotMarkers hotspots={hotspots} onSelect={handleHotspotSelect} />
+                  <HotspotMarkers
+                    hotspots={hotspots}
+                    onSelect={handleHotspotSelect}
+                  />
                 </Suspense>
                 <OrbitControls
                   ref={controlsRef}

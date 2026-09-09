@@ -19,11 +19,12 @@ describe("useFavorite", () => {
 
     fireEvent.click(screen.getByRole("button", { name: "未收藏" }));
     expect(screen.getByRole("button", { name: "已收藏" })).toBeVisible();
-    expect(
-      JSON.parse(
-        localStorage.getItem("little-car-museum:favorites:v1") ?? "[]",
-      ),
-    ).toEqual(["vehicle-1"]);
+    const records = JSON.parse(
+      localStorage.getItem("little-car-museum:favorites") ?? "[]",
+    );
+    expect(records).toHaveLength(1);
+    expect(records[0].vehicleId).toBe("vehicle-1");
+    expect(records[0].createdAt).toEqual(expect.any(String));
 
     unmount();
     render(<FavoriteHarness />);
@@ -31,9 +32,7 @@ describe("useFavorite", () => {
 
     fireEvent.click(screen.getByRole("button", { name: "已收藏" }));
     expect(
-      JSON.parse(
-        localStorage.getItem("little-car-museum:favorites:v1") ?? "[]",
-      ),
+      JSON.parse(localStorage.getItem("little-car-museum:favorites") ?? "[]"),
     ).toEqual([]);
   });
 });

@@ -87,3 +87,20 @@ test("does not expose draft vehicle details in production", async ({
     0,
   );
 });
+
+test("provides empty states for local favorites and history", async ({
+  page,
+}) => {
+  for (const [path, title, heading] of [
+    ["/favorites", "我的收藏 | 小小汽车馆", "还没有收藏汽车"],
+    ["/history", "最近浏览 | 小小汽车馆", "还没有浏览记录"],
+  ] as const) {
+    const response = await page.goto(path);
+    expect(response?.status()).toBe(200);
+    await expect(page).toHaveTitle(title);
+    await expect(page.getByRole("heading", { name: heading })).toBeVisible();
+    await expect(
+      page.getByRole("link", { name: "去汽车展厅" }),
+    ).toHaveAttribute("href", "/cars");
+  }
+});

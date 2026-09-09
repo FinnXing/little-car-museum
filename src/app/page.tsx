@@ -19,6 +19,20 @@ export default function HomePage() {
       >
         进入汽车展厅
       </Link>
+      <nav aria-label="我的汽车记录" className="flex flex-wrap gap-4">
+        <Link
+          href="/favorites"
+          className="min-h-12 py-3 font-bold text-ink underline decoration-2 underline-offset-4"
+        >
+          我的收藏
+        </Link>
+        <Link
+          href="/history"
+          className="min-h-12 py-3 font-bold text-ink underline decoration-2 underline-offset-4"
+        >
+          最近浏览
+        </Link>
+      </nav>
     </main>
   );
 }

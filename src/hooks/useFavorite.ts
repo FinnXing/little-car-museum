@@ -1,54 +1,24 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
-
-const FAVORITES_KEY = "little-car-museum:favorites:v1";
-
-function readFavoriteIds() {
-  if (typeof window === "undefined") return [];
-  try {
-    const stored = JSON.parse(
-      window.localStorage.getItem(FAVORITES_KEY) ?? "[]",
-    );
-    return Array.isArray(stored) &&
-      stored.every((value) => typeof value === "string")
-      ? stored
-      : [];
-  } catch {
-    return [];
-  }
-}
-
-function writeFavoriteIds(ids: string[]) {
-  try {
-    window.localStorage.setItem(FAVORITES_KEY, JSON.stringify(ids));
-  } catch {
-    // Private browsing or a full storage quota should not block detail viewing.
-  }
-}
+import { useCallback, useSyncExternalStore } from "react";
+import {
+  getEmptySnapshot,
+  getFavoritesSnapshot,
+  subscribeToLocalLibrary,
+  toggleFavoriteRecord,
+} from "@/lib/client/local-library";
 
 export function useFavorite(vehicleId: string) {
-  const [isFavorite, setIsFavorite] = useState(() =>
-    readFavoriteIds().includes(vehicleId),
+  const snapshot = useSyncExternalStore(
+    subscribeToLocalLibrary,
+    getFavoritesSnapshot,
+    getEmptySnapshot,
   );
-
-  useEffect(() => {
-    const syncFromStorage = (event: StorageEvent) => {
-      if (event.key === FAVORITES_KEY)
-        setIsFavorite(readFavoriteIds().includes(vehicleId));
-    };
-    window.addEventListener("storage", syncFromStorage);
-    return () => window.removeEventListener("storage", syncFromStorage);
-  }, [vehicleId]);
+  const records = JSON.parse(snapshot) as Array<{ vehicleId: string }>;
+  const isFavorite = records.some((record) => record.vehicleId === vehicleId);
 
   const toggleFavorite = useCallback(() => {
-    setIsFavorite((current) => {
-      const next = new Set(readFavoriteIds());
-      if (current) next.delete(vehicleId);
-      else next.add(vehicleId);
-      writeFavoriteIds([...next]);
-      return !current;
-    });
+    toggleFavoriteRecord(vehicleId);
   }, [vehicleId]);
 
   return { isFavorite, toggleFavorite };

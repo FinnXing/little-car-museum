@@ -3,6 +3,7 @@
 import dynamic from "next/dynamic";
 import Link from "next/link";
 import { useFavorite } from "@/hooks/useFavorite";
+import { useVehicleHistory } from "@/hooks/useVehicleHistory";
 import type { CameraConfig, Category, Vehicle } from "@/types";
 
 const CarViewer = dynamic(
@@ -38,6 +39,7 @@ interface VehicleDetailProps {
 
 export function VehicleDetail({ vehicle, categories }: VehicleDetailProps) {
   const { isFavorite, toggleFavorite } = useFavorite(vehicle.id);
+  useVehicleHistory(vehicle.id);
   const [categoryName] = vehicle.categoryIds
     .map((id) => categories.find((category) => category.id === id)?.nameCn)
     .filter((name): name is string => Boolean(name));
