@@ -1,4 +1,4 @@
-import type { Material, Object3D } from "three";
+import type { Material, Object3D, Texture } from "three";
 import type { CameraConfig } from "@/types";
 import type { ModelQuality } from "@/types/viewer";
 
@@ -87,6 +87,7 @@ export function cameraPositionForPreset(
 }
 
 export function disposeObject3D(root: Object3D) {
+  const textures = new Set<Texture>();
   root.traverse((child) => {
     const disposable = child as Object3D & {
       geometry?: { dispose?: () => void };
@@ -94,9 +95,28 @@ export function disposeObject3D(root: Object3D) {
     };
     disposable.geometry?.dispose?.();
     if (Array.isArray(disposable.material)) {
-      disposable.material.forEach((material) => material.dispose());
+      disposable.material.forEach((material) => {
+        collectMaterialTextures(material, textures);
+        material.dispose();
+      });
     } else {
+      if (disposable.material)
+        collectMaterialTextures(disposable.material, textures);
       disposable.material?.dispose();
     }
   });
+  textures.forEach((texture) => texture.dispose());
+}
+
+function collectMaterialTextures(material: Material, textures: Set<Texture>) {
+  for (const value of Object.values(material)) {
+    if (
+      typeof value === "object" &&
+      value !== null &&
+      "isTexture" in value &&
+      (value as { isTexture?: boolean }).isTexture
+    ) {
+      textures.add(value as Texture);
+    }
+  }
 }

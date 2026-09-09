@@ -1,4 +1,4 @@
-import { BoxGeometry, Mesh, MeshBasicMaterial } from "three";
+import { BoxGeometry, DataTexture, Mesh, MeshBasicMaterial } from "three";
 import { describe, expect, test, vi } from "vitest";
 import {
   cameraPositionForPreset,
@@ -69,13 +69,18 @@ describe("viewer-utils", () => {
   test("disposes cloned geometry and materials when the viewer unmounts", () => {
     const geometry = new BoxGeometry(1, 1, 1);
     const material = new MeshBasicMaterial();
+    const texture = new DataTexture(new Uint8Array([255, 255, 255, 255]), 1, 1);
+    texture.needsUpdate = true;
+    material.map = texture;
     const mesh = new Mesh(geometry, material);
     const geometryDispose = vi.spyOn(geometry, "dispose");
     const materialDispose = vi.spyOn(material, "dispose");
+    const textureDispose = vi.spyOn(texture, "dispose");
 
     disposeObject3D(mesh);
 
     expect(geometryDispose).toHaveBeenCalledOnce();
     expect(materialDispose).toHaveBeenCalledOnce();
+    expect(textureDispose).toHaveBeenCalledOnce();
   });
 });

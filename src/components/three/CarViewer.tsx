@@ -16,6 +16,7 @@ import {
   type ReactNode,
 } from "react";
 import { Box3, Color, Mesh, Object3D, Vector3 } from "three";
+import type { Material, Texture } from "three";
 import type { CameraConfig, VehicleColor } from "@/types";
 import type { Hotspot } from "@/types";
 import type {
@@ -91,20 +92,58 @@ function useWebGLSupport() {
   return supported;
 }
 
+function useInViewport(ref: RefObject<HTMLElement | null>) {
+  const [isInViewport, setIsInViewport] = useState(
+    () => typeof IntersectionObserver === "undefined",
+  );
+
+  useEffect(() => {
+    if (isInViewport || !ref.current) return;
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (!entry?.isIntersecting) return;
+        setIsInViewport(true);
+        observer.disconnect();
+      },
+      { rootMargin: "240px 0px" },
+    );
+    observer.observe(ref.current);
+    return () => observer.disconnect();
+  }, [isInViewport, ref]);
+
+  return isInViewport;
+}
+
 function cloneScene(source: Object3D) {
   const cloned = source.clone(true);
   let hasColorMaterials = false;
+  const cloneMaterial = (material: Material) => {
+    const nextMaterial = material.clone();
+    for (const [key, value] of Object.entries(nextMaterial)) {
+      if (
+        typeof value === "object" &&
+        value !== null &&
+        "isTexture" in value &&
+        (value as { isTexture?: boolean }).isTexture
+      ) {
+        (nextMaterial as unknown as Record<string, unknown>)[key] = (
+          value as Texture
+        ).clone();
+      }
+    }
+    return nextMaterial;
+  };
   cloned.traverse((child) => {
     if (!(child instanceof Mesh)) return;
     child.geometry = child.geometry.clone();
     if (Array.isArray(child.material)) {
       child.material = child.material.map((material) => {
-        const nextMaterial = material.clone();
+        const nextMaterial = cloneMaterial(material);
         if (nextMaterial.name === "body_paint") hasColorMaterials = true;
         return nextMaterial;
       });
     } else {
-      child.material = child.material.clone();
+      child.material = cloneMaterial(child.material);
       if (child.material.name === "body_paint") hasColorMaterials = true;
     }
   });
@@ -309,6 +348,9 @@ function FallbackGallery({
         <img
           src={imageUrl}
           alt="汽车占位预览"
+          loading="lazy"
+          decoding="async"
+          sizes="(max-width: 768px) 100vw, 60vw"
           className="max-h-[25rem] w-full object-contain"
           onError={() => setFailed(true)}
         />
@@ -390,6 +432,8 @@ export function CarViewer({
 }: CarViewerProps) {
   const reducedMotion = useReducedMotion();
   const webglSupported = useWebGLSupport();
+  const viewerRef = useRef<HTMLElement | null>(null);
+  const isInViewport = useInViewport(viewerRef);
   const deviceSignals = useMemo(() => {
     if (typeof navigator === "undefined") {
       return {
@@ -531,6 +575,7 @@ export function CarViewer({
 
   return (
     <section
+      ref={viewerRef}
       aria-labelledby={`${vehicleId}-viewer-title`}
       className="grid gap-4"
     >
@@ -560,6 +605,24 @@ export function CarViewer({
       <div className="relative overflow-hidden rounded-[2rem] border-2 border-ink bg-mint-soft shadow-[8px_8px_0_var(--color-ink)]">
         {showFallback ? (
           <FallbackGallery imageUrls={imageUrls} onRetry={handleRetry} />
+        ) : !isInViewport ? (
+          <div
+            className="grid min-h-[20rem] place-items-center bg-mint-soft p-6 text-center sm:min-h-[28rem]"
+            role="status"
+            aria-live="polite"
+          >
+            <div className="grid max-w-sm gap-2">
+              <span className="text-5xl" aria-hidden="true">
+                ◌
+              </span>
+              <p className="font-display text-xl font-black text-ink">
+                滚动到这里后加载 3D 模型
+              </p>
+              <p className="font-semibold leading-7 text-ink-muted">
+                先加载页面内容，靠近观察台时再准备模型。
+              </p>
+            </div>
+          </div>
         ) : (
           <div
             className="relative min-h-[20rem] sm:min-h-[28rem]"
@@ -586,9 +649,9 @@ export function CarViewer({
                   near: 0.1,
                   far: 100,
                 }}
-                dpr={[1, 1.75]}
-                gl={{ antialias: true, alpha: true }}
-                shadows
+                dpr={deviceSignals.isMobile ? [1, 1.25] : [1, 1.75]}
+                gl={{ antialias: !deviceSignals.isMobile, alpha: true }}
+                shadows={!deviceSignals.isMobile}
               >
                 <color attach="background" args={["#e8f4ee"]} />
                 <ambientLight intensity={1.8} />
