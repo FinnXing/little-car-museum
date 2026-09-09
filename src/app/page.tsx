@@ -32,6 +32,18 @@ export default function HomePage() {
         >
           最近浏览
         </Link>
+        <Link
+          href="/credits"
+          className="min-h-12 py-3 font-bold text-ink underline decoration-2 underline-offset-4"
+        >
+          素材与感谢
+        </Link>
+        <Link
+          href="/privacy"
+          className="min-h-12 py-3 font-bold text-ink underline decoration-2 underline-offset-4"
+        >
+          隐私说明
+        </Link>
       </nav>
     </main>
   );
