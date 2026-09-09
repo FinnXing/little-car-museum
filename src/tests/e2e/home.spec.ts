@@ -45,3 +45,35 @@ test("keeps draft fixture vehicles out of the production car list", async ({
     ),
   ).toBe(true);
 });
+
+test("opens the independent 3D viewer prototype with accessible controls", async ({
+  page,
+}) => {
+  const errors: string[] = [];
+  page.on("pageerror", (error) => errors.push(error.message));
+  page.on("console", (message) => {
+    if (message.type() === "error") errors.push(message.text());
+  });
+
+  const response = await page.goto("/prototype/viewer");
+
+  expect(response?.status()).toBe(200);
+  await expect(page).toHaveTitle("3D 观察台原型 | 小小汽车馆");
+  await expect(
+    page.getByRole("heading", { name: /把汽车转一转/ }),
+  ).toBeVisible();
+  await expect(page.getByRole("button", { name: "前方" })).toBeVisible();
+  await expect(page.getByRole("button", { name: "复位" })).toBeVisible();
+  await expect(
+    page.getByRole("button", { name: "开启自动旋转" }),
+  ).toBeVisible();
+  await expect(
+    page.getByRole("button", { name: "选择展示红" }),
+  ).toBeVisible();
+  expect(
+    await page.evaluate(
+      () => document.documentElement.scrollWidth <= window.innerWidth,
+    ),
+  ).toBe(true);
+  expect(errors).toEqual([]);
+});
